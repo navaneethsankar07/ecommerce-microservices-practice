@@ -36,8 +36,8 @@ class OrderListCreateView(APIView):
         try:
 
             user_response = requests.get(
-                f"http://127.0.0.1:8001/users/{user_id}/"
-            )
+                f"http://user-service:8000/users/{user_id}/"
+)               
 
             if user_response.status_code != 200:
                 return Response(
@@ -46,8 +46,8 @@ class OrderListCreateView(APIView):
                 )
 
             product_response = requests.get(
-                f"http://127.0.0.1:8002/products/{product_id}/"
-            )
+    f"http://product-service:8000/products/{product_id}/"
+)
 
             if product_response.status_code != 200:
                 return Response(
