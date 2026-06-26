@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environments
+venv/
+.venv/
+
+# Django
+db.sqlite3
+*.sqlite3
+
+# Environment Variables
+.env
+
+# VS Code
+.vscode/
+
+
+# Logs
+*.log
+
+# Migrations Cache
+*.pyc
+
+# Pytest
+.pytest_cache/
+
+# Docker
+*.tar
+
+# Build
+build/
+dist/
+
+# Coverage
+htmlcov/
+.coverage
+
+.idea/
