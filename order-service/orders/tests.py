@@ -1,11 +1,11 @@
 from unittest.mock import Mock, patch
+import json
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from orders.models import Order
-import json
 
 
 class HealthCheckTests(APITestCase):
@@ -15,20 +15,27 @@ class HealthCheckTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = json.loads(response.content)
-
         self.assertEqual(data["status"], "healthy")
 
-        
+
 class OrderTests(APITestCase):
     @patch("orders.views.requests.get")
     def test_create_order(self, mock_get):
         user_response = Mock()
         user_response.status_code = 200
+        user_response.json.return_value = {
+            "id": 1,
+            "name": "Navaneeth",
+            "email": "nav@example.com",
+        }
 
         product_response = Mock()
         product_response.status_code = 200
         product_response.json.return_value = {
-            "quantity": 10,
+            "id": 1,
+            "name": "Laptop",
+            "price": "50000.00",
+            "stock": 10,
         }
 
         mock_get.side_effect = [
