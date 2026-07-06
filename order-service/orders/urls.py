@@ -2,18 +2,18 @@ from django.urls import path
 
 from .views import (
     health,
-    OrderListCreateView
+    OrderListCreateView,
 )
 
 urlpatterns = [
-
     path(
         "health/",
-        health
+        health,
+        name="health",
     ),
-
     path(
         "orders/",
-        OrderListCreateView.as_view()
+        OrderListCreateView.as_view(),
+        name="order-list",
     ),
 ]

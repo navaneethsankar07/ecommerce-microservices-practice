@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from products.models import Product
+import json
 
 
 class HealthCheckTests(APITestCase):
@@ -10,7 +11,10 @@ class HealthCheckTests(APITestCase):
         response = self.client.get("/health/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["status"], "healthy")
+
+        data = json.loads(response.content)
+
+        self.assertEqual(data["status"], "healthy")
 
 
 class ProductTests(APITestCase):
@@ -18,7 +22,7 @@ class ProductTests(APITestCase):
         payload = {
             "name": "Laptop",
             "price": "50000.00",
-            "quantity": 20,
+            "stock": 20,
         }
 
         response = self.client.post(
@@ -34,7 +38,7 @@ class ProductTests(APITestCase):
         product = Product.objects.create(
             name="Laptop",
             price=50000,
-            quantity=20,
+            stock=20,
         )
 
         response = self.client.get(

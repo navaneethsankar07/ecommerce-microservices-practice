@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from orders.models import Order
+import json
 
 
 class HealthCheckTests(APITestCase):
@@ -12,9 +13,12 @@ class HealthCheckTests(APITestCase):
         response = self.client.get("/health/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["status"], "healthy")
 
+        data = json.loads(response.content)
 
+        self.assertEqual(data["status"], "healthy")
+
+        
 class OrderTests(APITestCase):
     @patch("orders.views.requests.get")
     def test_create_order(self, mock_get):
