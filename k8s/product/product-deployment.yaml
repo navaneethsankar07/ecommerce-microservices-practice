@@ -28,6 +28,12 @@ spec:
         - containerPort: 8000
 
         env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: SECRET_KEY
+
         - name: DB_NAME
           value: product_db
 

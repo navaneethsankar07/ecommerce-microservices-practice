@@ -21,13 +21,19 @@ spec:
       - name: user-service
 
         image: navaneethsankar7/user-service:latest
-        
+
         imagePullPolicy: Always
 
         ports:
         - containerPort: 8000
 
         env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: SECRET_KEY
+
         - name: DB_NAME
           value: user_db
 
