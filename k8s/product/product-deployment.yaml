@@ -20,9 +20,9 @@ spec:
       containers:
       - name: product-service
 
-        image: product-service:v2
+        image: navaneethsankar7/product-service:latest
 
-        imagePullPolicy: Never
+        imagePullPolicy: Always
 
         ports:
         - containerPort: 8000
