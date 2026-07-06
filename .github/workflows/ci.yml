@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - develop
-
   pull_request:
     branches:
       - main
@@ -14,74 +13,166 @@ permissions:
   contents: read
 
 jobs:
-  test-and-analyze:
-
+  user-tests:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: user_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d user_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_NAME: user_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: 5432
+
     steps:
+      - uses: actions/checkout@v4
 
-
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-
-      - name: Cache pip packages
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          key: user-${{ runner.os }}-${{ hashFiles('user-service/requirements.txt') }}
 
-
-      - name: Install User Service Dependencies
-        working-directory: user-service
+      - working-directory: user-service
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - working-directory: user-service
+        run: python manage.py migrate
 
-      - name: Install Product Service Dependencies
-        working-directory: product-service
+      - working-directory: user-service
+        run: python manage.py test
+
+  product-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: product_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d product_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_NAME: product_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: 5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: product-${{ runner.os }}-${{ hashFiles('product-service/requirements.txt') }}
+
+      - working-directory: product-service
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - working-directory: product-service
+        run: python manage.py migrate
 
-      - name: Install Order Service Dependencies
-        working-directory: order-service
+      - working-directory: product-service
+        run: python manage.py test
+
+  order-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: order_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d order_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_NAME: order_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: 5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: order-${{ runner.os }}-${{ hashFiles('order-service/requirements.txt') }}
+
+      - working-directory: order-service
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Test User Service
-        working-directory: user-service
-        run: |
-          python manage.py test
+      - working-directory: order-service
+        run: python manage.py migrate
 
+      - working-directory: order-service
+        run: python manage.py test
 
-      - name: Test Product Service
-        working-directory: product-service
-        run: |
-          python manage.py test
+  sonarcloud:
+    needs:
+      - user-tests
+      - product-tests
+      - order-tests
 
-      - name: Test Order Service
-        working-directory: order-service
-        run: |
-          python manage.py test
+    runs-on: ubuntu-latest
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-
-      - name: SonarCloud Quality Gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
+      - uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
