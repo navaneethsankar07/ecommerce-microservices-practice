@@ -7,15 +7,12 @@ on:
       - completed
 
 jobs:
-
   deploy:
-
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     runs-on: self-hosted
 
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -28,20 +25,23 @@ jobs:
       - name: Build User Service
         run: |
           docker build \
-          -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest \
-          ./user-service
+            -f user-service/Dockerfile \
+            -t ${{ secrets.DOCKER_USERNAME }}/user-service:latest \
+            user-service
 
       - name: Build Product Service
         run: |
           docker build \
-          -t ${{ secrets.DOCKER_USERNAME }}/product-service:latest \
-          ./product-service
+            -f product-service/Dockerfile \
+            -t ${{ secrets.DOCKER_USERNAME }}/product-service:latest \
+            product-service
 
       - name: Build Order Service
         run: |
           docker build \
-          -t ${{ secrets.DOCKER_USERNAME }}/order-service:latest \
-          ./order-service
+            -f order-service/Dockerfile \
+            -t ${{ secrets.DOCKER_USERNAME }}/order-service:latest \
+            order-service
 
       - name: Push User Image
         run: |
