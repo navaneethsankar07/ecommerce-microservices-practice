@@ -62,13 +62,43 @@ jobs:
           kubectl rollout restart deployment/order-service
 
       - name: Wait for User Deployment
+        id: user_rollout
+        continue-on-error: true
         run: |
-          kubectl rollout status deployment/user-service
+          kubectl rollout status deployment/user-service --timeout=120s
+      
+      - name: Rollback User Service
+        if: steps.user_rollout.outcome == 'failure'
+        run: |
+          kubectl rollout undo deployment/user-service
+          kubectl rollout status deployment/user-service --timeout=120s
 
       - name: Wait for Product Deployment
+        id: product_rollout
+        continue-on-error: true
         run: |
-          kubectl rollout status deployment/product-service
+          kubectl rollout status deployment/product-service --timeout=120s
+
+      - name: Rollback Product Service
+        if: steps.product_rollout.outcome == 'failure'
+        run: |
+          kubectl rollout undo deployment/product-service
+          kubectl rollout status deployment/product-service --timeout=120s
 
       - name: Wait for Order Deployment
+        id: order_rollout
+        continue-on-error: true
         run: |
-          kubectl rollout status deployment/order-service
+          kubectl rollout status deployment/order-service --timeout=120s
+
+      - name: Rollback Order Service
+        if: steps.order_rollout.outcome == 'failure'
+        run: |
+          kubectl rollout undo deployment/order-service
+          kubectl rollout status deployment/order-service --timeout=120s
+
+      - name: Fail workflow if any rollback occurred
+        if: steps.user_rollout.outcome == 'failure' || steps.product_rollout.outcome == 'failure' || steps.order_rollout.outcome == 'failure'
+        run: |
+          echo "One or more deployments failed. Rollback executed."
+          exit 1
