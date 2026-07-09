@@ -20,7 +20,7 @@ spec:
       containers:
       - name: user-service
 
-        image: image: navaneethsankar7/user-service:placeholder
+        image: navaneethsankar7/user-service:placeholder
 
         imagePullPolicy: Always
 
