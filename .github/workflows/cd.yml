@@ -14,6 +14,7 @@ jobs:
 
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       - name: Checkout Repository
@@ -26,22 +27,37 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build User Service
-        run: docker build -f user-service/Dockerfile -t ${DOCKER_USERNAME}/user-service:latest user-service
+        run: |
+          docker build \
+            -f user-service/Dockerfile \
+            -t ${DOCKER_USERNAME}/user-service:${IMAGE_TAG} \
+            user-service
 
       - name: Build Product Service
-        run: docker build -f product-service/Dockerfile -t ${DOCKER_USERNAME}/product-service:latest product-service
+        run: |
+          docker build \
+            -f product-service/Dockerfile \
+            -t ${DOCKER_USERNAME}/product-service:${IMAGE_TAG} \
+            product-service
 
       - name: Build Order Service
-        run: docker build -f order-service/Dockerfile -t ${DOCKER_USERNAME}/order-service:latest order-service
+        run: |
+          docker build \
+            -f order-service/Dockerfile \
+            -t ${DOCKER_USERNAME}/order-service:${IMAGE_TAG} \
+            order-service
 
       - name: Push User Image
-        run: docker push ${DOCKER_USERNAME}/user-service:latest
+        run: |
+          docker push ${DOCKER_USERNAME}/user-service:${IMAGE_TAG}
 
       - name: Push Product Image
-        run: docker push ${DOCKER_USERNAME}/product-service:latest
+        run: |
+          docker push ${DOCKER_USERNAME}/product-service:${IMAGE_TAG}
 
       - name: Push Order Image
-        run: docker push ${DOCKER_USERNAME}/order-service:latest
+        run: |
+          docker push ${DOCKER_USERNAME}/order-service:${IMAGE_TAG}
 
       - name: Start Minikube
         run: |
@@ -59,18 +75,18 @@ jobs:
         run: |
           kubectl apply -R -f k8s/
 
-      - name: Restart Deployments
+      - name: Update Deployment Images
         run: |
-          kubectl rollout restart deployment/user-service
-          kubectl rollout restart deployment/product-service
-          kubectl rollout restart deployment/order-service
+          kubectl set image deployment/user-service user-service=${DOCKER_USERNAME}/user-service:${IMAGE_TAG}
+          kubectl set image deployment/product-service product-service=${DOCKER_USERNAME}/product-service:${IMAGE_TAG}
+          kubectl set image deployment/order-service order-service=${DOCKER_USERNAME}/order-service:${IMAGE_TAG}
 
       - name: Wait for User Deployment
         id: user_rollout
         continue-on-error: true
         run: |
           kubectl rollout status deployment/user-service --timeout=300s
-      
+
       - name: Rollback User Service
         if: steps.user_rollout.outcome == 'failure'
         run: |

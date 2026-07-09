@@ -20,7 +20,7 @@ spec:
       containers:
       - name: product-service
 
-        image: navaneethsankar7/product-service:latest
+        image: navaneethsankar7/user-service:placeholder
 
         imagePullPolicy: Always
 
