@@ -43,6 +43,10 @@ jobs:
       - name: Push Order Image
         run: docker push ${DOCKER_USERNAME}/order-service:latest
 
+      - name: Start Minikube
+        run: |
+          minikube start
+          
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
 
