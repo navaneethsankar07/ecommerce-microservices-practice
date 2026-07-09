@@ -101,7 +101,14 @@ jobs:
         if: steps.user_rollout.outcome == 'failure'
         run: |
           kubectl rollout undo deployment/user-service
-          kubectl rollout status deployment/user-service --timeout=300s
+
+          echo "Rollback executed"
+
+          kubectl get deployment user-service
+
+          kubectl get pods -l app=user-service
+
+          kubectl rollout history deployment/user-service
 
       - name: Wait for Product Deployment
         id: product_rollout
@@ -113,7 +120,14 @@ jobs:
         if: steps.product_rollout.outcome == 'failure'
         run: |
           kubectl rollout undo deployment/product-service
-          kubectl rollout status deployment/product-service --timeout=300s
+
+          echo "Rollback executed"
+
+          kubectl get deployment product-service
+
+          kubectl get pods -l app=product-service
+
+          kubectl rollout history deployment/product-service
 
       - name: Wait for Order Deployment
         id: order_rollout
@@ -125,7 +139,14 @@ jobs:
         if: steps.order_rollout.outcome == 'failure'
         run: |
           kubectl rollout undo deployment/order-service
-          kubectl rollout status deployment/order-service --timeout=300s
+
+          echo "Rollback executed"
+
+          kubectl get deployment order-service
+
+          kubectl get pods -l app=order-service
+
+          kubectl rollout history deployment/order-service
 
       - name: Fail workflow if any rollback occurred
         if: steps.user_rollout.outcome == 'failure' || steps.product_rollout.outcome == 'failure' || steps.order_rollout.outcome == 'failure'
