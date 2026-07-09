@@ -35,7 +35,7 @@ spec:
               key: SECRET_KEY
 
         - name: DB_NAME
-          value: user_db
+          value: invalid
 
         - name: DB_USER
           value: postgres
