@@ -20,7 +20,7 @@ spec:
       containers:
       - name: user-service
 
-        image: navaneethsankar7/user-service:latest
+        image: navaneethsankar7/user-service:broken
 
         imagePullPolicy: Always
 
